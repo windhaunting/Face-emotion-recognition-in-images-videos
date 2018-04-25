@@ -6,7 +6,7 @@ import numpy as np
 from keras.callbacks import LambdaCallback, EarlyStopping
 
 import feature_utility as fu
-import myVGG
+import modifiedVGG
 
 parser = argparse.ArgumentParser(description=("Model training process."))
 # parser.add_argument('data_path', help=("The path of training data set"))
@@ -15,7 +15,7 @@ parser.add_argument('--test', help=("Input a single image to check if the model 
 args = parser.parse_args()
 
 def main():
-    model = myVGG.VGG_16()
+    model = modifiedVGG.VGG_16()
 
     if args.test is not None:
         print ("Test mode")
