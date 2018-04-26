@@ -63,7 +63,7 @@ def extractModifiedVGG(inputImage = None, shape = None):
     '''
     weights_path = "my_model_weights_83.h5"
     
-    model = modifiedVGG.VGG_16(weights_path="my_model_weights_83.h5", shape=(1, 48, 48))
+    model = modifiedVGG.VGG_16(weights_path=weights_path, shape=(1, 48, 48))
     #print ("model summary: ", model.summary())
     #print ("model weight: ", model.weights, len(model.weights))
     
@@ -88,7 +88,8 @@ def extractModifiedVGG(inputImage = None, shape = None):
         print ("featuredX: ", featuredX.shape)
      
     
-testImage = "../dataSet/jaffe/KA.AN3.41.tiff"
-extractModifiedVGG(inputImage = testImage)
+if __name__ == "__main__":
+    testImage = "../dataSet/jaffe/KA.AN3.41.tiff"
+    extractModifiedVGG(inputImage = testImage)
 
 
