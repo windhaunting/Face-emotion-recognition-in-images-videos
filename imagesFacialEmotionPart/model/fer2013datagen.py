@@ -12,8 +12,11 @@ import sys
 # emotion labels from FER2013:
 emotion = {'Angry': 0, 'Disgust': 1, 'Fear': 2, 'Happy': 3,
            'Sad': 4, 'Surprise': 5, 'Neutral': 6}
-emo     = ['Angry', 'Fear', 'Happy',
+#emo     = ['Angry', 'Fear', 'Happy',
+#           'Sad', 'Surprise', 'Neutral']
+emo     = ['Angry', 'Disgust', 'Fear', 'Happy',
            'Sad', 'Surprise', 'Neutral']
+
 
 def reconstruct(pix_str, size=(48,48)):
     pix_arr = []

@@ -3,6 +3,13 @@
 # Dependencies  
 python3 
 opencv  
+
+keras
+
+
+
+
+'''
 tflearn
 
 
@@ -21,6 +28,7 @@ pip3 install git+https://github.com/tflearn/tflearn.git
 in face expression, there is hard negative;       false positive, called flicker? for different frames.
 -single detection;               hand treated as nonfaces. improve the accuracy by reclassification.
 
+'''
 
 
 #reference:

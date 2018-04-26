@@ -12,13 +12,14 @@ parser.add_argument('--dataset', help=('Input a directory to test model predicti
 
 args = parser.parse_args()
 def main():
-    model = modifiedVGG.VGG_16('my_model_weights.h5')
-
+    model = modifiedVGG.VGG_16('my_model_weights_83.h5')
+    print ('model: ', model.summary())
     if args.image is not None:
         print ('Image Prediction Mode')
         img = fu.preprocessing(cv2.imread(args.image))
         X = np.expand_dims(img, axis=0)
         X = np.expand_dims(X, axis=0)
+        print ("XX: ", X.shape)
         result = model.predict(X)
         print (result)
         return

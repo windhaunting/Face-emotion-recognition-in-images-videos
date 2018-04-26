@@ -6,7 +6,7 @@ def preprocessing(img, size=(48, 48)):
     img = cv2.resize(img, size).astype(np.float32)
     #img = img.transpose((2, 0, 1))
     # img = np.expand_dims(img, axis=0)
-
+    print ("img size", img.shape)
     return img
     
 def extract_features(path):
