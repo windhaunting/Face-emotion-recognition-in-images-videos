@@ -53,17 +53,20 @@ def modifiedVGG16Model(weights_path=None, shape=(1, 48, 48)):
     model.add(Dense(512, activation='relu'))                       # 20
     model.add(Dropout(0.5))
     
+    print ("modifiedVGG16Model Create model successfully")
+
     return model
 
-def extractModifiedVGG(inputImage = None, shape = None):
+def extractModifiedVGGSingleImages(inputImage, shape):
     
     '''
     get loaded weight from previous model;
     not use the last layer (softmax)
+    apply on the single image to get features
     '''
     weights_path = "my_model_weights_83.h5"
     
-    model = modifiedVGG.VGG_16(weights_path=weights_path, shape=(1, 48, 48))
+    model = modifiedVGG.VGG_16(weights_path=weights_path, shape=shape)
     #print ("model summary: ", model.summary())
     #print ("model weight: ", model.weights, len(model.weights))
     
@@ -87,9 +90,35 @@ def extractModifiedVGG(inputImage = None, shape = None):
         
         print ("featuredX: ", featuredX.shape)
      
+
+def extractModifiedVGGArray(x, shape):
+    
+    '''
+    get features from an  numpy array sets from the cnn pretrained model
+    '''
+    
+    print ("extractModifiedVGGArray x  shape", x.shape, shape)
+    
+    weights_path = "my_model_weights_83.h5"
+    
+    model = modifiedVGG.VGG_16(weights_path=weights_path, shape=shape)
+    #print ("model summary: ", model.summary())
+    #print ("model weight: ", model.weights, len(model.weights))
+    
+    #weights = model.layers[20].get_weights()
+    #print ("first layer weight: ",len(weights), np.asarray(weights).shape)
+    modelNew = modifiedVGG16Model(weights_path = None, shape=shape)
+    
+    modelNew.set_weights(model.get_weights()[:-1])
+    #model.set_weights(model.get_weights())
+    print ("modelNew summary: ", modelNew.summary())
+    
+    if x is not None:
+        cnnfeaturesX = modelNew.predict(x)
+        return cnnfeaturesX
     
 if __name__ == "__main__":
     testImage = "../dataSet/jaffe/KA.AN3.41.tiff"
-    extractModifiedVGG(inputImage = testImage)
+    extractModifiedVGGSingleImages(inputImage = testImage, shape=(48,48))
 
 
