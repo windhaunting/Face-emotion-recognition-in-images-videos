@@ -11,6 +11,7 @@ LSTM model to train facial emotions dataset
 
 '''
 
+           
 # 1 dataset : JAFFE
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
@@ -19,8 +20,11 @@ from sklearn.model_selection import StratifiedKFold
 from keras.models import Sequential
 from keras.layers import Dense, Embedding, Dropout,Flatten
 from keras.layers import LSTM
-
 from dataPreprocess import getDataArrayFromImages
+from plotVisual import plotLossAccur
+from keras import backend as Kb
+from keras import optimizers
+
 
 def lstmModel(trainX_shape, trainY_shape):
     
@@ -34,11 +38,11 @@ def lstmModel(trainX_shape, trainY_shape):
     features = trainX_shape[2]       #48   # or time_step 1, features = 48*48= 2304
     model = Sequential()
     #model.add(Embedding(max_features, output_dim = embed_outDim, input_length = input_length))
-    model.add(LSTM(128, input_shape=(time_step, features), return_sequences=True))
-    model.add(Dropout(0.3))
+    model.add(LSTM(256, input_shape=(time_step, features), return_sequences=True))
+    model.add(Dropout(0.5))
 
-    model.add(LSTM(64, input_shape=(time_step, 128), return_sequences=True))
-    model.add(Dropout(0.3))
+    model.add(LSTM(128, input_shape=(time_step, 128), return_sequences=True))
+    model.add(Dropout(0.5))
     
     weights = model.layers[0].get_weights()
     print(model.summary())
@@ -58,10 +62,14 @@ def lstmModel(trainX_shape, trainY_shape):
 
 
     # try using different optimizers and different optimizer configs
+    adam = optimizers.Adam(lr=0.001, decay=1e-5)
+    #Kb.set_value(model.optimizer.lr, 0.01)
+
     model.compile(loss='categorical_crossentropy',
-                  optimizer='adam',
+                  optimizer=adam,   #'adam',
                   metrics=['accuracy'])
     
+    print ("lstmModel created successfully learning rate: ", Kb.get_value(model.optimizer.lr))
     return model
 
 def lstmTrain(feature_x, y):
@@ -69,15 +77,16 @@ def lstmTrain(feature_x, y):
     '''
     train on lstm used trainsferred learning from cnn feature extractor
     '''
-    x_train = feature_x[:50]   #  feature_x
+    x_train = feature_x # [:50]   #  feature_x
     #x_train = x_train.reshape((x_train.shape[0], -1))
-    y_train = y[:50]    # y_train
+    y_train = y#  [:50]    # y_train
     print(x_train.shape)
     print(y_train.shape) 
     batch_size = 10
     
     trainX_shape, trainY_shape = x_train.shape, y_train.shape
     model = lstmModel(trainX_shape, trainY_shape)
+
 
     # transfer learning from cnn
     '''
@@ -89,11 +98,12 @@ def lstmTrain(feature_x, y):
     
     '''
     print('Training...')
-    model.fit(x_train, y_train,
+    history = model.fit(x_train, y_train,
               batch_size=batch_size,
-              epochs=100,
+              epochs=50,
               validation_split=0.2,
               shuffle=True,
+              #callbacks=[PlotLearning],
               verbose=2)
     print ("------*****")
     score, acc = model.evaluate(x_train, y_train,
@@ -101,14 +111,17 @@ def lstmTrain(feature_x, y):
     print('Train score:', score)
     print('Train accuracy:', acc)
 
+    print(history.history['val_loss'])
 
+    #plot loss 
+    plotLossAccur(history)
 def lstmTrainExecute(dataDirPath):
     feature_x, y = getDataArrayFromImages(dataDirPath)
     lstmTrain(feature_x, y)
     
     
+    
 if __name__ == "__main__":
     #testImage = "../dataSet/jaffe/KA.AN3.41.tiff"
     dataDirPath = "../dataSet/jaffe/"
-    
     lstmTrainExecute(dataDirPath)

@@ -17,11 +17,12 @@ import cv2
 from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
+
+from keras.utils import plot_model
 import modifiedVGG
 
 
-
-def modifiedVGG16Model(weights_path=None, shape=(1, 48, 48)):
+def modifiedVGG16Model(weights_path=None, shape=(1, 256, 256)):
     '''
     no output softmax
     '''
@@ -57,6 +58,13 @@ def modifiedVGG16Model(weights_path=None, shape=(1, 48, 48)):
 
     return model
 
+def VGG16Model():
+    '''
+    use pretrained VGG16 model
+    '''
+    x = 1
+    
+    
 def extractModifiedVGGSingleImages(inputImage, shape):
     
     '''
@@ -72,12 +80,12 @@ def extractModifiedVGGSingleImages(inputImage, shape):
     
     #weights = model.layers[20].get_weights()
     #print ("first layer weight: ",len(weights), np.asarray(weights).shape)
-    modelNew = modifiedVGG16Model()
+    modelNew = modifiedVGG16Model(weights_path=None, shape=shape)
     modelNew.set_weights(model.get_weights()[:-1])
     #model.set_weights(model.get_weights())
     print ("modelNew summary: ", modelNew.summary())
 
-    weights = modelNew.layers[20].get_weights()
+    weights = modelNew.layers[-2].get_weights()
     print ("firsttt layer weight: ",len(weights), np.asarray(weights).shape)
     
     if inputImage is not None:
@@ -105,7 +113,7 @@ def extractModifiedVGGArray(x, shape):
     #print ("model summary: ", model.summary())
     #print ("model weight: ", model.weights, len(model.weights))
     
-    #weights = model.layers[20].get_weights()
+    #weights = model.layers[-2].get_weights()       # [20]
     #print ("first layer weight: ",len(weights), np.asarray(weights).shape)
     modelNew = modifiedVGG16Model(weights_path = None, shape=shape)
     
@@ -119,6 +127,6 @@ def extractModifiedVGGArray(x, shape):
     
 if __name__ == "__main__":
     testImage = "../dataSet/jaffe/KA.AN3.41.tiff"
-    extractModifiedVGGSingleImages(inputImage = testImage, shape=(48,48))
+    extractModifiedVGGSingleImages(inputImage = testImage, shape=(1, 256,256))
 
-
+     #model = modifiedVGG16Model(weights_path=None, shape=(1, 256, 256))
