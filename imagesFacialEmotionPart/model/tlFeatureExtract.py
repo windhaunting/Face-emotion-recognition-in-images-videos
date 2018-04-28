@@ -21,6 +21,10 @@ from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2
 from keras.utils import plot_model
 import modifiedVGG
 
+from keras.applications.vgg16 import VGG16
+from keras.applications.vgg16 import preprocess_input
+from keras.models import Model
+
 
 def modifiedVGG16Model(weights_path=None, shape=(1, 256, 256)):
     '''
@@ -62,8 +66,15 @@ def VGG16Model():
     '''
     use pretrained VGG16 model
     '''
-    x = 1
+    vgg16 = VGG16(weights='imagenet', include_top=True)
+
+    #Add a layer where input is the output of the  second last layer 
+    x = Dense(7, activation='softmax', name='predictions')(vgg16.layers[-2].output)
     
+    #Then create the corresponding model 
+    my_model = Model(input=vgg16.input, output=x)
+    my_model.summary()
+
     
 def extractModifiedVGGSingleImages(inputImage, shape):
     
@@ -127,6 +138,7 @@ def extractModifiedVGGArray(x, shape):
     
 if __name__ == "__main__":
     testImage = "../dataSet/jaffe/KA.AN3.41.tiff"
-    extractModifiedVGGSingleImages(inputImage = testImage, shape=(1, 256,256))
+    #extractModifiedVGGSingleImages(inputImage = testImage, shape=(1, 256,256))
 
      #model = modifiedVGG16Model(weights_path=None, shape=(1, 256, 256))
+    VGG16Model()
