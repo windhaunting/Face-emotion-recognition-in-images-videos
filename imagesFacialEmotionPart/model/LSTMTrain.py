@@ -20,11 +20,12 @@ from sklearn.model_selection import StratifiedKFold
 from keras.models import Sequential
 from keras.layers import Dense, Embedding, Dropout,Flatten
 from keras.layers import LSTM
-from dataPreprocess import getDataArrayFromImages
 from plotVisual import plotLossAccur
 from keras import backend as Kb
 from keras import optimizers
 
+from dataPreprocess import getJAFFEDataArrayFromImages
+from dataPreprocess import getCKDataArrayFromImages
 
 def lstmModel(trainX_shape, trainY_shape):
     
@@ -100,7 +101,7 @@ def lstmTrain(feature_x, y):
     print('Training...')
     history = model.fit(x_train, y_train,
               batch_size=batch_size,
-              epochs=50,
+              epochs=20,
               validation_split=0.2,
               shuffle=True,
               #callbacks=[PlotLearning],
@@ -116,7 +117,12 @@ def lstmTrain(feature_x, y):
     #plot loss 
     plotLossAccur(history)
 def lstmTrainExecute(dataDirPath):
-    feature_x, y = getDataArrayFromImages(dataDirPath)
+    #train JAFFE dataset
+    feature_x, y = getJAFFEDataArrayFromImages(dataDirPath)
+    
+    #train CK+ dataset
+    feature_x, y = getCKDataArrayFromImages(dataDirPath)
+
     lstmTrain(feature_x, y)
     
     
@@ -125,3 +131,6 @@ if __name__ == "__main__":
     #testImage = "../dataSet/jaffe/KA.AN3.41.tiff"
     dataDirPath = "../dataSet/jaffe/"
     lstmTrainExecute(dataDirPath)
+    
+    # 
+    

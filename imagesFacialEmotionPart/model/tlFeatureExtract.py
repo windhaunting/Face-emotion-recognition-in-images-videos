@@ -22,8 +22,11 @@ from keras.utils import plot_model
 import modifiedVGG
 
 from keras.applications.vgg16 import VGG16
+
 from keras.applications.vgg16 import preprocess_input
 from keras.models import Model
+from keras.preprocessing import image
+from keras.layers.normalization import BatchNormalization
 
 
 def modifiedVGG16Model(weights_path=None, shape=(1, 256, 256)):
@@ -66,16 +69,38 @@ def VGG16Model():
     '''
     use pretrained VGG16 model
     '''
-    vgg16 = VGG16(weights='imagenet', include_top=True)
+    
+    #load vgg16 without dense layer and with theano dim ordering
+    base_model = VGG16(weights = 'imagenet', include_top = False, input_shape = (3, 256, 256))
+
+    #number of classes in your dataset e.g. 20    
+    x = Flatten()(base_model.output)
+    x = Dense(4096, activation='relu')(x)
+    x = Dropout(0.5)(x)
+    x = BatchNormalization()(x)
+    #predictions = Dense(7, activation = 'softmax')(x)
+
 
     #Add a layer where input is the output of the  second last layer 
-    x = Dense(7, activation='softmax', name='predictions')(vgg16.layers[-2].output)
+    #x = Dense(7, activation='softmax', name='predictions')(vgg16.layers[-2].output)
     
     #Then create the corresponding model 
-    my_model = Model(input=vgg16.input, output=x)
-    my_model.summary()
+    newModel = Model(input=base_model.input, output=x)
+    newModel.summary()
 
+    return newModel
+
+def extractModifiedVGG16toArray(x, shape):
     
+    '''
+    get features from an  numpy array sets from the cnn pretrained model
+    '''
+    
+    modelNew = VGG16Model()
+    if x is not None:
+        cnnfeaturesX = modelNew.predict(x)
+        return cnnfeaturesX
+
 def extractModifiedVGGSingleImages(inputImage, shape):
     
     '''
@@ -137,8 +162,14 @@ def extractModifiedVGGArray(x, shape):
         return cnnfeaturesX
     
 if __name__ == "__main__":
-    testImage = "../dataSet/jaffe/KA.AN3.41.tiff"
+    testImage = "../dataSet/jaffe/Angry/KA.AN3.41.tiff"
     #extractModifiedVGGSingleImages(inputImage = testImage, shape=(1, 256,256))
 
      #model = modifiedVGG16Model(weights_path=None, shape=(1, 256, 256))
-    VGG16Model()
+    model = VGG16Model()
+    img = image.load_img(testImage, target_size=(224, 224))
+    x = image.img_to_array(img)
+    x = np.expand_dims(x, axis=0)
+    x = preprocess_input(x)
+    cnnfeaturesX = model.predict(x)
+    print ("shape: ",cnnfeaturesX.shape, cnnfeaturesX)
