@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Apr 24 09:54:14 2018
+
+@author: fubao
+"""
+
+import sys, os
+import cv2
+import numpy as np
+
+# load data of images to transfer to numpy array used for training/validation/testing
+
+# JAFFE  data
+
+from collections import defaultdict	
+
+from keras.preprocessing.image import ImageDataGenerator
+
+from tlFeatureExtract import preprocessing
+from tlFeatureExtract import extractModifiedVGGSingleImages 
+from tlFeatureExtract import extractModifiedVGGArray
+from tlFeatureExtract import extractModifiedVGG16toArray
+from tlFeatureExtract import visualLayersOutput
+
+from plotVisual import plotDatasetDistribution
+
+emotions = {'Angry': 0, 'Disgust': 1, 'Fear': 2, 'Happy': 3,
+           'Sad': 4, 'Surprise': 5, 'Neutral': 6}
+
+
+
+def getJAFFEDataArrayFromImages(dataDirPath):
+    '''
+    get x input from images by cv2 preprocessing and cnn pretrained model
+    '''
+    x, y = [], []
+    #label = 0
+    perClassDataDic = defaultdict(int)       # number of each class labels;  key: emotion, values: count
+    
+    for dirnames in os.listdir(dataDirPath):
+        # print(dirnames)
+        sub_path = os.path.join(dataDirPath, dirnames)
+        #print(sub_path)
+
+        for filename in os.listdir(sub_path):
+            file_path = os.path.join(sub_path, filename)
+            #print (file_path)
+            #img = cv2.imread(file_path)
+            img = preprocessing(file_path)
+            
+            # transferred learning feature
+            x.append(img)
+            
+            #get label_y
+            emo_file = sub_path.split("/")[-1]
+            classes = [0, 0, 0, 0, 0, 0, 0]
+            classes[emotions[emo_file]] = 1
+            y.append(classes)
+             
+            #print ('xxxxxxxx: ', filename, x, y)
+            perClassDataDic[emo_file] += 1
+
+    
+    
+    x = np.asarray(x)
+    y = np.asarray(y)
+    
+    # do mean and standardlization 
+    x -= np.mean(x, axis=0)
+    x /= np.std(x, axis=0)
+    
+    x = x.reshape(x.shape[0], x.shape[1]*x.shape[2], x.shape[3])
+
+    x = np.stack((x,)*3, 1)
+
+    #use original images
+    x = x.reshape(x.shape[0], x.shape[1], x.shape[2], x.shape[3])
+    
+    print('get_dataArrayFromImages x.shape, y.shape: ', x.shape, y.shape)
+
+    #by cnn feature extractor transferred learning
+    #x = extractModifiedVGGArray(x, shape = x.shape[1:])
+    
+    #x = extractModifiedVGG16toArray(x, shape = x.shape)  #.shape[1:])
+    #x = x[:,np.newaxis,:]
+    print('get_dataArrayFromImages use pretrained x.shape, y.shape: ', x.shape, y.shape)
+
+    print ("perclassDataDic: ", perClassDataDic)
+    #plotDatasetDistribution(perClassDataDic, "JAFFE")
+    return x, y
+
+
+
+# second data CK+
+    
+def getCKDataArrayFromImages(dataDirPath):
+    '''
+    # CK+ emotions 0=neutral, 1=anger, 2=contempt, 3=disgust, 4=fear, 5=happy, 6=sadness, 7=surprise)
+    '''
+    
+    inputEmotions = {0: 'Neutral', 1: 'Angry', 2: 'Contempt', 3: 'Disgust',
+                     4: 'Fear', 5: 'Happy', 6: 'Sad', 7: 'Surprise'}
+    # we only use 7 emotions
+    #read images and also transfer to our emotions categories
+    
+    x, y = [], []
+
+    cnt = 0
+    
+    perClassDataDic = defaultdict(int)       # number of each class labels;  key: emotion, values: count
+    
+    for dirnames1 in os.listdir(dataDirPath):
+        # print(dirnames)
+        sub_path1 = os.path.join(dataDirPath, dirnames1)
+        #print(sub_path1)
+        for dirnames2 in os.listdir(sub_path1):
+            sub_path2 = os.path.join(sub_path1, dirnames2)
+            #print('sub_path2: ', sub_path2)
+
+            #for filename in os.listdir(sub_path2):
+            #file_path = os.path.join(sub_path2, filename)
+            #print (file_path)
+            
+            emotionLabelFilePath = '/'.join(sub_path1.split('/')[:3]) + '/Emotion/' + dirnames1 + '/' + dirnames2
+            if os.path.isdir(emotionLabelFilePath):
+                filenameLst = sorted(list(os.listdir(emotionLabelFilePath)))
+                #print ("filenameLst: ", filenameLst)
+            
+                for filename in os.listdir(emotionLabelFilePath):
+                    emotionLabelPathFile = emotionLabelFilePath + '/' + filename
+                    #print ("emotionLabelPathFile: ", emotionLabelPathFile)
+                    
+                    cnt += 1
+                    
+                    
+                    #if cnt > 3:            #total 5876
+                    #    break
+                    
+                    #1st get the last N figure as the emotion_labeled feature
+                    emotionLabelFile = filename
+                    #print ("emotionLabelFile: ", emotionLabelFile)
+                    emoLabel_figNo = emotionLabelFile.split('_')[2]
+                    
+                    #use last four emotion
+                    emotionLabel =  int(float(open(emotionLabelPathFile).read().strip().lower()))  # read contents from file
+                    # transfer different emotions representation
+                    if emotionLabel == 2:     # do not consider "contempt
+                        continue
+                    emotionId = emotions[inputEmotions[emotionLabel]]
+                    
+                    figure_path = os.path.join(sub_path2)
+                    figuresNames = sorted([f for f in os.listdir(figure_path) if f.endswith('.png')])
+                    N = int(len(figuresNames)/3)           # 1/3 
+                    
+                    for figName in figuresNames[::-1][:N]:
+                        classes = [0, 0, 0, 0, 0, 0, 0]
+                        #print ("emotionLabel: ", emotionLabel, emotionId)
+                        classes[emotionId] = 1
+                        y.append(classes)
+                        #print ("figures: ", figName)
+                        #emotional labeled file 
+                        #figFileName = '_'.join(emotionLabelFile.split('_')[:2]) + '_' + emoLabel_figNo + '.png'
+                        imgFile = os.path.join(sub_path2, figName)
+                        #print ("imgFile: ", imgFile)
+                        img = preprocessing(imgFile, size=(256, 256))
+                        x.append(img)
+                        
+                        perClassDataDic[inputEmotions[emotionLabel]] += 1
+                        
+                    #2nd get neutral, use first 2nd figures as neutral
+                    N = 2
+                    for figName in figuresNames[:N]:
+                        imgFileNeutral = os.path.join(sub_path2, figName)
+                        imgNeu = preprocessing(imgFileNeutral, size=(256, 256))
+                        #print ("imgFile22: ", imgFileNeutral)
+                        x.append(imgNeu)
+                        classes = [0, 0, 0, 0, 0, 0, 0]
+                        emotionId = 6
+                        classes[emotionId] = 1
+                        y.append(classes)
+
+                        perClassDataDic[inputEmotions[0]] += 1
+                        
+    x = np.asarray(x)
+    y = np.asarray(y)
+    
+    # do mean and standardlization 
+    x -= np.mean(x, axis=0)
+    x /= np.std(x, axis=0)
+
+    print ("file numy cnt: ", cnt, x.shape, y.shape)               # total shape (5643, 7
+    
+    print ("perclassDataDic: ", perClassDataDic)
+    
+    '''
+    x = x.reshape(x.shape[0], x.shape[1]*x.shape[2], x.shape[3])
+    x = np.stack((x,)*3, 1)
+    
+    print('get_dataArrayFromImages x.shape, y.shape: ', x.shape, y.shape)
+    #by cnn feature extractor transferred learning
+    x = extractModifiedVGGArray(x, shape = x.shape[1:])
+    
+    #x = extractModifiedVGG16toArray(x, shape = x.shape)  #.shape[1:])
+    #x = x[:,np.newaxis,:]
+    #print('get_dataArrayFromImages use pretrained x.shape, y.shape: ', x.shape, y.shape)
+    '''
+    
+    # no cnn feature extractor
+    x = x.reshape(x.shape[0], x.shape[1]*x.shape[2], x.shape[3])
+    
+    #plotDatasetDistribution(perClassDataDic, "CK+")
+
+    return x, y
+
+
+if __name__ == "__main__" :
+    dataPathJAFFE =  "../dataSet/jaffe/"
+    #x, y = getJAFFEDataArrayFromImages(dataPathJAFFE)
+    #print(x.shape, y.shape)
+    #print(type(x), type(x[0]))
+    #print(x[212])
+    #print(len(X))
+    
+    #dataPathCK = "../dataSet/CK+/cohn-kanade-images/"
+    #getCKDataArrayFromImages(dataPathCK)
+    
+    
+    # show one image
+    '''
+    testImage = "../dataSet/jaffe/Angry/KA.AN3.41.tiff"
+
+    img = preprocessing(testImage)
+    cv2.imshow('image',img)
+    cv2.waitKey(0)
+    '''
+    testImage = "../dataSet/jaffe/Angry/KA.AN3.41.tiff"
+ 
+    visualLayersOutput(testImage)
+    

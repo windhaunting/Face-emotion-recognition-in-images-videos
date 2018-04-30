@@ -30,6 +30,7 @@ from keras.applications.vgg16 import preprocess_input
 from keras.models import Model
 from keras.preprocessing import image
 from keras.layers.normalization import BatchNormalization
+from CNNActivation import get_activations, display_activations
 
 
 def preprocessing(img, size=(256, 256)):
@@ -37,7 +38,7 @@ def preprocessing(img, size=(256, 256)):
 
     img = cv2.imread(img, 0)
     #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img = cv2.resize(img, size)     # .astype(np.float32)    
+    img = cv2.resize(img, size).astype(np.float32)    
     #img = img.transpose((2, 0, 1))
     img = np.expand_dims(img, axis=0)
     #print ("img size", img.shape)
@@ -233,7 +234,8 @@ def visualLayersOutput(testImage):
     
     print (" visualLayersOutput, modelNew: ")
     
-    layer_to_visualize(x, modelNew, modelNew.layers[-2])
+    a = get_activations(modelNew, x, print_shape_only=True)  # with just one sample.
+    display_activations(a)
     
     
     '''
