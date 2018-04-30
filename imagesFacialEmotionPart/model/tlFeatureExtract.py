@@ -12,6 +12,7 @@ import numpy as np
 
 import feature_utility as fu
 import cv2
+from matplotlib import pyplot as plt
 
 
 from keras.models import Sequential
@@ -19,6 +20,8 @@ from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 
 from keras.utils import plot_model
+from keras import backend as K
+
 import modifiedVGG
 
 from keras.applications.vgg16 import VGG16
@@ -27,6 +30,18 @@ from keras.applications.vgg16 import preprocess_input
 from keras.models import Model
 from keras.preprocessing import image
 from keras.layers.normalization import BatchNormalization
+
+
+def preprocessing(img, size=(256, 256)):
+    #print ("preprocessing img file", img)
+
+    img = cv2.imread(img, 0)
+    #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = cv2.resize(img, size)     # .astype(np.float32)    
+    #img = img.transpose((2, 0, 1))
+    img = np.expand_dims(img, axis=0)
+    #print ("img size", img.shape)
+    return img
 
 
 def modifiedVGG16Model(weights_path=None, shape=(1, 256, 256)):
@@ -138,7 +153,7 @@ def extractModifiedVGGSingleImages(inputImage, shape):
 def extractModifiedVGGArray(x, shape):
     
     '''
-    get features from an  numpy array sets from the cnn pretrained model
+    get features from an  numpy array sets from the cnn pretrained model vGG16
     '''
     
     print ("extractModifiedVGGArray x  shape", x.shape, shape)
@@ -167,9 +182,93 @@ if __name__ == "__main__":
 
      #model = modifiedVGG16Model(weights_path=None, shape=(1, 256, 256))
     model = VGG16Model()
-    img = image.load_img(testImage, target_size=(224, 224))
+    img = image.load_img(testImage, target_size=(256, 256))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     x = preprocess_input(x)
     cnnfeaturesX = model.predict(x)
     print ("shape: ",cnnfeaturesX.shape, cnnfeaturesX)
+    
+def layer_to_visualize(img_to_visualize, model, layer):
+    inputs = [K.learning_phase()] + model.inputs
+
+    _convout1_f = K.function(inputs, [layer.output])
+    def convout1_f(X):
+        # The [0] is to disable the training phase flag
+        return _convout1_f([0] + [X])
+
+    convolutions = convout1_f(img_to_visualize)
+    convolutions = np.squeeze(convolutions)
+
+    print ('Shape of conv:', convolutions.shape)
+    
+    n = convolutions.shape[0]
+    n = int(np.ceil(np.sqrt(n)))
+    
+    # Visualization of each filter of the layer
+    fig = plt.figure(figsize=(12,8))
+    for i in range(len(convolutions)):
+        ax = fig.add_subplot(n,n,i+1)
+        ax.imshow(convolutions[i], cmap='gray')
+        
+def visualLayersOutput(testImage):
+    
+        
+    img = preprocessing(testImage, size=(256, 256))
+    x = np.expand_dims(img, axis=0)
+    #x = np.expand_dims(x, axis=0)
+    x = np.asarray(x)
+
+    print (" visualLayersOutput, x shape: ", x.shape)
+    
+    weights_path = "my_model_weights_83.h5"
+    model = modifiedVGG.VGG_16(weights_path=weights_path, shape=(1,256,256))
+    #print ("model summary: ", model.summary())
+    #print ("model weight: ", model.weights, len(model.weights))
+    
+    #weights = model.layers[20].get_weights()
+    #print ("first layer weight: ",len(weights), np.asarray(weights).shape)
+    modelNew = modifiedVGG16Model(weights_path=None, shape=(1, 256,256))
+    modelNew.set_weights(model.get_weights()[:-1])
+    
+    print (" visualLayersOutput, modelNew: ")
+    
+    layer_to_visualize(x, modelNew, modelNew.layers[-2])
+    
+    
+    '''
+    weights_path = "my_model_weights_83.h5"
+    model = modifiedVGG.VGG_16(weights_path=weights_path, shape=(1, 256,256))
+    #print ("model summary: ", model.summary())
+    #print ("model weight: ", model.weights, len(model.weights))
+    
+    #weights = model.layers[20].get_weights()
+    #print ("first layer weight: ",len(weights), np.asarray(weights).shape)
+    modelNew = modifiedVGG16Model(weights_path=None, shape=(1, 256,256))
+    modelNew.set_weights(model.get_weights()[:-1])
+    
+    
+    img = preprocessing(testImage, size=(256, 256))
+    x = np.expand_dims(img, axis=0)
+    #x = np.expand_dims(x, axis=0)
+    x = np.asarray(x)
+
+    print (" visualLayersOutput, x shape: ", x.shape)
+    
+    desiredLayers = [1,5]
+    desiredOutputs = [modelNew.layers[i].output for i in desiredLayers] 
+
+    #alternatively, you can use cnnModel.get_layer('layername').output for that    
+
+    newModel = Model(modelNew.inputs, desiredOutputs)
+    output = newModel.predict(x)
+    print("newModel.predict(x): ", output.shape)
+
+    plt.imshow(output)
+    '''
+    
+
+if __name__ == "__main__" :
+    
+    x = 1
+ 

@@ -63,7 +63,7 @@ def lstmModel(trainX_shape, trainY_shape):
 
 
     # try using different optimizers and different optimizer configs
-    adam = optimizers.Adam(lr=0.001, decay=1e-5)
+    adam = optimizers.Adam(lr=0.0001, decay=1e-6)
     #Kb.set_value(model.optimizer.lr, 0.01)
 
     model.compile(loss='categorical_crossentropy',
@@ -87,7 +87,6 @@ def lstmTrain(feature_x, y):
     
     trainX_shape, trainY_shape = x_train.shape, y_train.shape
     model = lstmModel(trainX_shape, trainY_shape)
-
 
     # transfer learning from cnn
     '''
@@ -116,12 +115,13 @@ def lstmTrain(feature_x, y):
 
     #plot loss 
     plotLossAccur(history)
-def lstmTrainExecute(dataDirPath):
+def lstmTrainExecute(dataDirPath, datasetId):
     #train JAFFE dataset
-    feature_x, y = getJAFFEDataArrayFromImages(dataDirPath)
-    
-    #train CK+ dataset
-    feature_x, y = getCKDataArrayFromImages(dataDirPath)
+    if datasetId == 0:
+        feature_x, y = getJAFFEDataArrayFromImages(dataDirPath)
+    else:
+        #train CK+ dataset
+        feature_x, y = getCKDataArrayFromImages(dataDirPath)
 
     lstmTrain(feature_x, y)
     
@@ -129,8 +129,9 @@ def lstmTrainExecute(dataDirPath):
     
 if __name__ == "__main__":
     #testImage = "../dataSet/jaffe/KA.AN3.41.tiff"
-    dataDirPath = "../dataSet/jaffe/"
-    lstmTrainExecute(dataDirPath)
+    dataDirPathJAFFE = "../dataSet/jaffe/"
+    lstmTrainExecute(dataDirPathJAFFE, 0)
     
-    # 
-    
+    # CK+ 
+    #dataPathCK = "../dataSet/CK+/cohn-kanade-images/"
+    #lstmTrainExecute(dataPathCK, 1)
