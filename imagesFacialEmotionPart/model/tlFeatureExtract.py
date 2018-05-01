@@ -32,6 +32,9 @@ from keras.preprocessing import image
 from keras.layers.normalization import BatchNormalization
 from CNNActivation import get_activations, display_activations
 
+from PIL import ImageFont
+from PIL import Image
+from PIL import ImageDraw
 
 def preprocessing(img, size=(256, 256)):
     #print ("preprocessing img file", img)
@@ -45,7 +48,7 @@ def preprocessing(img, size=(256, 256)):
     return img
 
 
-def modifiedVGG16Model(weights_path=None, shape=(1, 256, 256)):
+def modifiedVGG16Model(weights_path=None, shape=(256, 256)):
     '''
     no output softmax
     '''
@@ -70,13 +73,13 @@ def modifiedVGG16Model(weights_path=None, shape=(1, 256, 256)):
     model.add(Convolution2D(128, 3, 3, activation='relu'))         # 15
     model.add(MaxPooling2D((2,2), strides=(2,2)))
 
-    
+    '''
     model.add(Flatten())
     model.add(Dense(1024, activation='relu'))                      # 18
     model.add(Dropout(0.5))
     model.add(Dense(512, activation='relu'))                       # 20
     model.add(Dropout(0.5))
-    
+    '''
     print ("modifiedVGG16Model Create model successfully")
 
     return model
@@ -141,16 +144,20 @@ def extractModifiedVGGSingleImages(inputImage, shape):
     print ("firsttt layer weight: ",len(weights), np.asarray(weights).shape)
     
     if inputImage is not None:
-        img = fu.preprocessing(cv2.imread(inputImage))
-        X = np.expand_dims(img, axis=0)
-        X = np.expand_dims(X, axis=0)
-        print ("XX: ", X.shape)
+        img = preprocessing(inputImage)
+        x = np.expand_dims(img, axis=0)
+        #X = np.expand_dims(X, axis=0)
+        print ("XX: ", x.shape)
             
-        featuredX = modelNew.predict(X)
+        x = np.asarray(x)
+        # do mean and standardlization 
+        x -= np.mean(x, axis=0)
+        x /= np.std(x, axis=0)
+        print ("x: ", x.shape)
+        #featuredX = modelNew.predict(x)
         
-        print ("featuredX: ", featuredX.shape)
-     
 
+    
 def extractModifiedVGGArray(x, shape):
     
     '''
@@ -169,26 +176,15 @@ def extractModifiedVGGArray(x, shape):
     #print ("first layer weight: ",len(weights), np.asarray(weights).shape)
     modelNew = modifiedVGG16Model(weights_path = None, shape=shape)
     
-    modelNew.set_weights(model.get_weights()[:-1])
+    modelNew.set_weights(model.get_weights()[:-5])
     #model.set_weights(model.get_weights())
     print ("modelNew summary: ", modelNew.summary())
     
     if x is not None:
         cnnfeaturesX = modelNew.predict(x)
         return cnnfeaturesX
-    
-if __name__ == "__main__":
-    testImage = "../dataSet/jaffe/Angry/KA.AN3.41.tiff"
-    #extractModifiedVGGSingleImages(inputImage = testImage, shape=(1, 256,256))
+    return None
 
-     #model = modifiedVGG16Model(weights_path=None, shape=(1, 256, 256))
-    model = VGG16Model()
-    img = image.load_img(testImage, target_size=(256, 256))
-    x = image.img_to_array(img)
-    x = np.expand_dims(x, axis=0)
-    x = preprocess_input(x)
-    cnnfeaturesX = model.predict(x)
-    print ("shape: ",cnnfeaturesX.shape, cnnfeaturesX)
     
 def layer_to_visualize(img_to_visualize, model, layer):
     inputs = [K.learning_phase()] + model.inputs
@@ -217,7 +213,6 @@ def visualLayersOutput(testImage):
         
     img = preprocessing(testImage, size=(256, 256))
     x = np.expand_dims(img, axis=0)
-    #x = np.expand_dims(x, axis=0)
     x = np.asarray(x)
 
     print (" visualLayersOutput, x shape: ", x.shape)
@@ -269,8 +264,28 @@ def visualLayersOutput(testImage):
     plt.imshow(output)
     '''
     
+def textOnImage(image):
+    font = ImageFont.truetype(image,25)
+    img=Image.new("RGBA", (200,200),(120,20,20))
+    draw = ImageDraw.Draw(img)
+    draw.text((0, 0),"This is a test",(255,255,0),font=font)
+    draw = ImageDraw.Draw(img)
+    draw = ImageDraw.Draw(img)
+    img.save("a_test.png")
 
-if __name__ == "__main__" :
-    
-    x = 1
- 
+if __name__ == "__main__":
+    '''
+    testImage = "../dataSet/jaffe/Angry/KA.AN3.41.tiff"
+    #extractModifiedVGGSingleImages(inputImage = testImage, shape=(1, 256,256))
+
+     #model = modifiedVGG16Model(weights_path=None, shape=(1, 256, 256))
+    model = VGG16Model()
+    img = image.load_img(testImage, target_size=(256, 256))
+    x = image.img_to_array(img)
+    x = np.expand_dims(x, axis=0)
+    x = preprocess_input(x)
+    cnnfeaturesX = model.predict(x)
+    print ("shape: ",cnnfeaturesX.shape, cnnfeaturesX)
+    '''
+    testImage = "../dataSet/jaffe/Angry/KA.AN3.41.tiff"
+    textOnImage(testImage)

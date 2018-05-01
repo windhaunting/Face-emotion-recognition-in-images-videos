@@ -7,8 +7,9 @@ import numpy as np
 
 import face_detection_utilities as fdu
 
-import model.myVGG as vgg
+import model.modifiedVGG as vgg
 
+#import model.LSTMTrainTest as lstm
 windowsName = 'Preview Screen'
 
 parser = argparse.ArgumentParser(description='A live emotion recognition from webcam')
@@ -20,6 +21,10 @@ FACE_SHAPE = (48, 48)
 
 model = vgg.VGG_16('my_model_weights_83.h5')
 #model = vgg.VGG_16()
+
+FACE_SHAPE = (1, 48, 48)
+
+#model = lstm.lstmModel(FACE_SHAPE, FACE_SHAPE, weights_path="lstm_model_weights.h5")
 
 emo     = ['Angry', 'Fear', 'Happy',
            'Sad', 'Surprise', 'Neutral']

@@ -14,6 +14,8 @@ from tlFeatureExtract import modifiedVGG16Model
 from keras.callbacks import Callback
 from matplotlib import pyplot as plt
 from matplotlib.ticker import FuncFormatter
+from sklearn.metrics import confusion_matrix
+
 
 # https://medium.com/datalogue/attention-in-keras-1892773a4f22
 # 
@@ -23,11 +25,11 @@ def plotModel():
     plot the pretrained model and lstm model
     '''
     
-    cnnmodel = modifiedVGG16Model(weights_path=None, shape=(1, 48, 48))
-    plot_model(cnnmodel, to_file='plots/LSTM_model.svg')
+    cnnmodel = modifiedVGG16Model(weights_path=None, shape=(1, 256, 256))
+    plot_model(cnnmodel, show_shapes=True, to_file='../plots/CNN_model.svg')
 
-    lstmmodel = lstmModel(trainX_shape=(10000,1, 512), trainY_shape=(10000, 7))
-    plot_model(lstmmodel, show_shapes=True, to_file='plots/cnnmodel.svg')
+    #lstmmodel = lstmModel(trainX_shape=(10000,1, 512), trainY_shape=(10000, 7))
+    #plot_model(lstmmodel, show_shapes=True, to_file='../plots/LSTM_model.svg')
 
 
 
@@ -40,7 +42,7 @@ def plotLossAccur(history):
     plt.ylabel('Loss')
     plt.xlabel('Epoch')
     plt.legend(['train', 'validation'], loc='upper right')
-    plt.savefig("../plots/LossEpoch")
+    plt.savefig("../plots/LossEpoch.pdf")
     plt.show()
     
     plt.figure(2)
@@ -50,7 +52,7 @@ def plotLossAccur(history):
     plt.ylabel('Accuracy')
     plt.xlabel('Epoch')
     plt.legend(['train', 'validation'], loc='upper right')
-    plt.savefig("../plots/AccuracyEpoch")
+    plt.savefig("../plots/AccuracyEpoch.pdf")
 
     plt.show()
    
@@ -58,6 +60,10 @@ def plotLossAccur(history):
 def plotDatasetDistribution(perClassDataDic, dataName):
     '''
     plot dataset distribution for each category  
+    
+    y_true = [2, 0, 2, 2, 0, 1]
+    y_pred = [0, 0, 2, 2, 0, 2]
+    
     '''
     
     # plot
@@ -87,7 +93,83 @@ def plotDatasetDistribution(perClassDataDic, dataName):
     saveFilePath = '../plots/' + dataName + '-distribution.pdf'    
     plt.savefig(saveFilePath)
     plt.show()
+  
+def plotconfusionMatrix(y_true, y_pred, labels, dataName):
+    #cm = confusion_matrix(y_true, y_pred)
+    #labels = ['business', 'health', 'sports']
+    cm = confusion_matrix(y_true, y_pred)  # labels)
+    print(cm)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(cm)
+    #plt.title('Confusion matrix of the classifier')
+    fig.colorbar(cax)
+    ax.set_xticklabels([''] + labels, fontsize=8, style='italic')
+    ax.set_yticklabels([''] + labels, fontsize=8)
+    plt.xlabel('Predicted', fontsize=16)
+    plt.ylabel('True', fontsize=16)
+        
+    saveFilePath = '../plots/' + dataName + '-confusionMatrix22.pdf'    
+    plt.savefig(saveFilePath)
+    plt.show()
     
+
+def generateData():
+    
+    y_true =  [0, 3, 5, 6, 0, 6, 6, 6, 3, 6, 3, 0, 6, 3, 2, 0, 6, 3,
+              3, 3, 0, 3, 4, 3, 5, 6, 1, 6, 1, 1, 0, 4, 4, 3, 2, 0, 
+              1, 3, 0, 6, 3, 5, 5, 6, 1, 3, 6, 1, 5, 1, 3, 6, 3, 0, 
+              3, 6, 1, 0, 1, 6, 4, 5, 3, 6, 2, 3, 0, 6, 5, 3, 1, 3,
+              0, 0, 0, 4, 5, 5, 3, 3, 5, 0, 6, 5, 0, 3, 3, 3, 5, 0,
+              4, 3, 6, 3, 3, 6, 5, 6, 5, 5, 3, 3, 3, 6, 6, 5, 1, 6, 
+              3, 0, 5, 1, 4, 6, 6, 1, 6, 6, 6, 1, 4, 3, 0, 1, 3, 3,
+              0, 3, 1, 1, 6, 5, 0, 0, 3, 0, 6, 6, 0, 6, 6, 6, 6, 2, 
+              0, 3, 6, 3, 5, 5, 3, 0, 6, 0, 3, 1, 3, 0, 0, 6, 0, 1, 
+              3, 6, 3, 2, 3, 5, 0, 2, 1, 6, 6, 5, 0, 6, 2, 3, 5, 5, 
+              6, 2, 6, 4, 6, 5, 3, 5, 4, 6, 6, 5, 6, 3, 6, 6, 3, 3,
+              0, 0, 6, 5, 5, 6, 2, 0, 1, 6, 5, 6, 3, 5, 1, 3, 1, 5, 
+              5, 3, 5, 6, 4, 4, 4, 3, 3, 1, 2, 1, 3, 0, 3, 6, 6, 6, 
+              1, 2, 1, 2, 0, 1, 6, 3, 6, 6, 3, 3, 0, 0, 0, 3, 4, 5, 
+              5, 3, 6, 5, 5, 2, 5, 6, 1, 4, 3, 4, 0, 6, 3, 5, 3, 5, 
+              3, 1, 1, 3, 1, 4, 5, 4, 2, 4, 0, 0, 5, 6, 3, 0, 6, 1, 
+              6, 1, 3, 1, 6, 5, 6, 4, 0, 0, 4, 0, 1, 3, 3, 1, 0, 4, 
+              1, 1, 3, 3, 5, 3, 6, 0, 5, 3, 6, 6, 6, 0, 5, 5, 3, 6, 
+              6, 5, 0, 4, 6, 6, 1, 5, 6, 3, 3, 6, 6, 6, 1, 5, 2, 4,
+              3, 2, 0, 5, 1, 5, 6, 6, 3, 6, 6, 4, 5, 4, 3, 3, 2, 0, 
+              5, 6, 4, 1, 0, 3, 3, 3, 6, 0, 5, 3, 5, 1, 3, 6, 1, 5,
+              6, 2, 6, 0, 1]
+    y_pred =  [0, 3, 5, 6, 0, 6, 6, 6, 3, 6, 3, 0, 6, 3, 6, 0, 3, 3,
+              3, 3, 0, 3, 6, 3, 5, 6, 1, 6, 1, 1, 0, 4, 4, 3, 2, 0,
+              1, 3, 3, 6, 3, 6, 6, 6, 6, 3, 0, 6, 6, 6, 6, 6, 3, 6, 
+              3, 6, 3, 6, 6, 6, 6, 5, 6, 6, 6, 6, 6, 6, 6, 3, 6, 3, 
+              0, 0, 0, 3, 6, 6, 3, 3, 6, 6, 6, 2, 6, 6, 3, 6, 6, 0, 
+              6, 6, 6, 3, 6, 2, 6, 6, 6, 3, 6, 6, 6, 6, 0, 6, 6, 6, 
+              6, 6, 4, 6, 6, 6, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+              6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 6, 
+              6, 3, 6, 3, 6, 6, 6, 6, 3, 6, 3, 6, 6, 6, 6, 6, 6, 6,
+              6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 6, 5, 5, 
+              6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 
+              1, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 3, 6, 6, 6, 6, 6, 
+              6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 6, 6, 6, 6, 6, 6, 6, 6,
+              6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 5, 6, 6, 6, 6, 5, 
+              6, 3, 6, 6, 6, 6, 6, 6, 6, 3, 6, 6, 6, 6, 6, 6, 6, 5, 
+              3, 2, 6, 6, 6, 6, 6, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 
+              6, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3, 6, 6, 6, 
+              1, 6, 3, 3, 6, 3, 6, 6, 6, 3, 6, 6, 6, 6, 5, 5, 3, 6, 
+              6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 3, 6,
+              3, 3, 0, 6, 6, 6, 6, 6, 3, 6, 6, 6, 6, 3, 3, 3, 3, 6,
+              5, 6, 6, 6, 6, 3, 3, 3, 3, 5, 5, 6, 5, 6, 6, 6, 6, 5,
+              6, 6, 6, 0, 6]
+    print ('len y_true:', len(y_true))
+    
+    print ('len y_pred:', len(y_pred))
+    labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
+
+    plotconfusionMatrix(y_true, y_pred, labels, 'CK+')
+
 if __name__ == "__main__":
     x = 1
     #plotModel()
+
+    data = generateData()
+    
