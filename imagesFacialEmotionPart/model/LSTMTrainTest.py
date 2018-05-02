@@ -130,28 +130,32 @@ def lstmTrain(feature_x, y):
     
     return model
     
-def lstmTrainExecute(dataDirPath, datasetId):
+def lstmTrainExecute(datasetId):
     #train JAFFE dataset
     if datasetId == 0:
-        #feature_x, y = getJAFFEDataArrayFromImages(dataDirPath)
         x = np.load('dataNumpy/JAFFE_trainvalidation_X.npy')
         y = np.load('dataNumpy/JAFFE_trainvalidation_y.npy')
         
-    else:
+    elif datasetId == 1:
         #train CK+ dataset
-        #feature_x, y = getCKDataArrayFromImages(dataDirPath)
         x = np.load('dataNumpy/CK+_trainvalidation_X.npy')
         y = np.load('dataNumpy/CK+_trainvalidation_y.npy')
+        
+    else: 
+        # combined dateset
+        x = np.load('dataNumpy/total_trainvalidation_X.npy')
+        y = np.load('dataNumpy/total_trainvalidation_y.npy')
+        
 
     # split for train and validation, split for test
 
-    # do mean and standardlization 
+    #zero mean and standardlization 
     x -= np.mean(x, axis=0)
     x /= np.std(x, axis=0)
     
     print('getJAFFEDataArrayFromImages x.shape, y.shape: ', x.shape, y.shape)
     # w/o pretrained CNN model
-    x = x.reshape(x.shape[0], x.shape[1]*x.shape[2], x.shape[3])
+    #x = x.reshape(x.shape[0], x.shape[1]*x.shape[2], x.shape[3])
     
     #x = np.stack((x,)*3, 1)
 
@@ -160,10 +164,8 @@ def lstmTrainExecute(dataDirPath, datasetId):
     #print('get_dataArrayFromImages x.shape, y.shape: ', x.shape, y.shape)
  
     #by cnn feature extractor transferred learning
-    #x = extractModifiedVGGArray(x, shape=x.shape[1:])   #(x, shape = x.shape[1:])
-    #x = extractModifiedVGG16toArray(x, shape = x.shape)  #.shape[1:])
-    #x = x[:,np.newaxis,:]
-    #x = x.reshape(x.shape[0], x.shape[1], x.shape[2]*x.shape[3])
+    x = extractModifiedVGGArray(x, shape=x.shape[1:])   #(x, shape = x.shape[1:])
+    x = x.reshape(x.shape[0], x.shape[1], x.shape[2]*x.shape[3])
     print('lstmTrainExecute use pretrained x.shape, y.shape: ', x.shape, y.shape)
 
 
@@ -190,7 +192,7 @@ def testModel(datasetId, modelWeight):
     
         dataName = "JAFFE"
 
-    else:
+    elif datasetId == 1:
         #train CK+ dataset
         #feature_x, y = getCKDataArrayFromImages()
         x_test = np.load('dataNumpy/CK+_test_X.npy')
@@ -201,16 +203,28 @@ def testModel(datasetId, modelWeight):
         x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], x_test.shape[2]*x_test.shape[3])
   
         dataName = "CK"
+    elif datasetId == 2:
+        x_test = np.load('dataNumpy/total_test_X.npy')
+        y_test = np.load('dataNumpy/total_test_y.npy')
+        
+        #without cnn feature
+        x_test = x_test.reshape(x_test.shape[0], x_test.shape[1]*x_test.shape[2], x_test.shape[3])
+
+
+        print('testModel total x.shape, y.shape: ', x_test.shape, y_test.shape)
+        #x_test = extractModifiedVGGArray(x_test, shape=x_test.shape[1:])   #(x, shape = x.shape[1:])
+        #x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], x_test.shape[2]*x_test.shape[3])
+  
+        dataName = "totalDataset"
         
     model = lstmModel(x_test.shape, y_test.shape, modelWeight)
     y_pred = model.predict(x_test)
-    print (y_pred)
 
     y_test = np.argmax(y_test, axis=1) # Convert one-hot to index
     y_pred = model.predict_classes(x_test)
     
-    print ("y_test: ", list(y_test))
-    print ("y_pred: ", list(y_pred))
+    #print ("y_test: ", list(y_test))
+    #print ("y_pred: ", list(y_pred))
     print(classification_report(y_test, y_pred))
     
     labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
@@ -219,8 +233,8 @@ def testModel(datasetId, modelWeight):
 
 if __name__ == "__main__":
     #testImage = "../dataSet/jaffe/KA.AN3.41.tiff"
-    dataDirPathJAFFE = "../dataSet/jaffe/"
-    lstmTrainExecute(dataDirPathJAFFE, 0)
+    #dataDirPathJAFFE = "../dataSet/jaffe/"
+    #lstmTrainExecute( 0)
     
     # test
     #modelWeights = 'JAFFE_lstm_model_weights.h5'
@@ -231,8 +245,13 @@ if __name__ == "__main__":
 
     # CK+ 
     #dataPathCK = "../dataSet/CK+/cohn-kanade-images/"
-    #lstmTrainExecute(dataPathCK, 1)
+    #lstmTrainExecute(1)
 
     # test
     #modelWeights = 'CK+_lstm_model_weights.h5'
     #testModel(1, modelWeights)
+    
+    #lstmTrainExecute(2)
+    modelWeights = "total_with_lstm_model_weights.h5"
+    testModel(2, modelWeights)
+    

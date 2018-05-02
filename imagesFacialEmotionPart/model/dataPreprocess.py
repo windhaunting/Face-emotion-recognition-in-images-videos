@@ -93,14 +93,17 @@ def getJAFFEDataArrayFromImages(dataDirPath):
     
     x = np.asarray(x)
     y = np.asarray(y)
+    print ("JAFFE file numy cnt: ", cnt, x.shape, y.shape)               # total shape (5643, 7
+
     
+    '''
     x,y = shuffle_arrays_unison([x, y])
     
-    x = x[:int(0.8*len(x))]
-    y = y[:int(0.8*len(y))]
+    x_train = x[:int(0.8*len(x))]
+    y_train = y[:int(0.8*len(y))]
     
-    np.save('dataNumpy/JAFFE_trainvalidation_X.npy', x)
-    np.save('dataNumpy/JAFFE_trainvalidation_y.npy', y)
+    np.save('dataNumpy/JAFFE_trainvalidation_X.npy', x_train)
+    np.save('dataNumpy/JAFFE_trainvalidation_y.npy', y_train)
     
         
     x_test = x[int(0.8*len(x)):]
@@ -109,28 +112,9 @@ def getJAFFEDataArrayFromImages(dataDirPath):
     np.save('dataNumpy/JAFFE_test_X.npy', x_test)
     np.save('dataNumpy/JAFFE_test_y.npy', y_test)
     
+    '''
     
     '''
-    # do mean and standardlization 
-    x -= np.mean(x, axis=0)
-    x /= np.std(x, axis=0)
-    
-    print('getJAFFEDataArrayFromImages x.shape, y.shape: ', x.shape, y.shape)
-
-    x = x.reshape(x.shape[0], x.shape[1]*x.shape[2], x.shape[3])
-    #x = np.stack((x,)*3, 1)
-    '''
-    '''
-    #use original images
-    #x = x.reshape(x.shape[0], x.shape[1], x.shape[2], x.shape[3])
-    #print('get_dataArrayFromImages x.shape, y.shape: ', x.shape, y.shape)
- 
-    #by cnn feature extractor transferred learning
-    #x = extractModifiedVGGArray(x, shape=x.shape[1:])   #(x, shape = x.shape[1:])
-    #x = extractModifiedVGG16toArray(x, shape = x.shape)  #.shape[1:])
-    #x = x[:,np.newaxis,:]
-    print('get_dataArrayFromImages use pretrained x.shape, y.shape: ', x.shape, y.shape)
-
     print ("perclassDataDic: ", perClassDataDic)
     #plotDatasetDistribution(perClassDataDic, "JAFFE")
     '''
@@ -140,7 +124,6 @@ def getJAFFEDataArrayFromImages(dataDirPath):
 
 
 # second data CK+
-    
 def getCKDataArrayFromImages(dataDirPath):
     '''
     # CK+ emotions 0=neutral, 1=anger, 2=contempt, 3=disgust, 4=fear, 5=happy, 6=sadness, 7=surprise)
@@ -228,18 +211,21 @@ def getCKDataArrayFromImages(dataDirPath):
 
                         perClassDataDic[inputEmotions[0]] += 1
                         
-    print ("file aaaa numy cnt: ", cnt, len(x), len(x))               # total shape (5643, 7
+    #print ("CK+file aaaa numy cnt: ", cnt, len(x), len(x))               # total shape (5643, 7
     
     x = np.asarray(x)
     y = np.asarray(y)
     
+    print ("CK+ file numy cnt: ", cnt, x.shape, y.shape)               # total shape (5643, 7
+
+    '''
     x,y = shuffle_arrays_unison((x, y))      # randomly shuffle dataset
     
-    x = x[:int(0.8*len(x))]
-    y = y[:int(0.8*len(y))]
+    x_train = x[:int(0.8*len(x))]
+    y_train = y[:int(0.8*len(y))]
     
-    np.save('dataNumpy/CK+_trainvalidation_X.npy', x)
-    np.save('dataNumpy/CK+_trainvalidation_y.npy', y)
+    np.save('dataNumpy/CK+_trainvalidation_X.npy', x_train)
+    np.save('dataNumpy/CK+_trainvalidation_y.npy', y_train)
     
         
     x_test = x[int(0.8*len(x)):]
@@ -247,46 +233,57 @@ def getCKDataArrayFromImages(dataDirPath):
     
     np.save('dataNumpy/CK+_test_X.npy', x_test)
     np.save('dataNumpy/CK+_test_y.npy', y_test)
-    
-    # do mean and standardlization 
-    x -= np.mean(x, axis=0)
-    x /= np.std(x, axis=0)
 
-    print ("file numy cnt: ", cnt, x.shape, y.shape)               # total shape (5643, 7
-    
     print ("perclassDataDic: ", perClassDataDic)
-    
     '''
-    x = x.reshape(x.shape[0], x.shape[1]*x.shape[2], x.shape[3])
-    x = np.stack((x,)*3, 1)
-    
-    print('get_dataArrayFromImages x.shape, y.shape: ', x.shape, y.shape)
-    #by cnn feature extractor transferred learning
-    x = extractModifiedVGGArray(x, shape = x.shape[1:])
-    
-    #x = extractModifiedVGG16toArray(x, shape = x.shape)  #.shape[1:])
-    #x = x[:,np.newaxis,:]
-    #print('get_dataArrayFromImages use pretrained x.shape, y.shape: ', x.shape, y.shape)
-    '''
-    
-    # no cnn feature extractor
-    x = x.reshape(x.shape[0], x.shape[1]*x.shape[2], x.shape[3])
     
     #plotDatasetDistribution(perClassDataDic, "CK+")
     
     return x, y
     
 
+def getAllDataTrainResult(dataDirPathJA, dataDirPathCK):
+    '''
+    combine the two dataset JAFFE + CK+
+    '''
+    xJA, yJA = getJAFFEDataArrayFromImages(dataDirPathJA)
+    xCK, yCK = getCKDataArrayFromImages(dataDirPathCK)
+    
+    x= np.vstack((xJA, xCK))
+    y= np.vstack((yJA, yCK))
+    
+    
+    x,y = shuffle_arrays_unison((x, y))      # randomly shuffle dataset
+    
+    x_train = x[:int(0.8*len(x))]
+    y_train = y[:int(0.8*len(y))]
+    
+    np.save('dataNumpy/total_trainvalidation_X.npy', x_train)
+    np.save('dataNumpy/total_trainvalidation_y.npy', y_train)
+    
+        
+    x_test = x[int(0.8*len(x)):]
+    y_test = y[int(0.8*len(y)):]
+    
+    np.save('dataNumpy/total_test_X.npy', x_test)
+    np.save('dataNumpy/total_test_y.npy', y_test)
+
+    print ("getAllDataTrainResultfile numy: ", x.shape, y.shape)    
+    
+    
+    
+    
+    
 if __name__ == "__main__" :
-    dataPathJAFFE =  "../dataSet/jaffe/"
-    x, y = getJAFFEDataArrayFromImages(dataPathJAFFE)
+    #dataPathJAFFE =  "../dataSet/jaffe/"
+    #x, y = getJAFFEDataArrayFromImages(dataPathJAFFE)
     #print(x.shape, y.shape)
     #print(type(x), type(x[0]))
     #print(x[212])
     #print(len(X))
     
-    dataPathCK = "../dataSet/CK+/cohn-kanade-images/"
-    getCKDataArrayFromImages(dataPathCK)
+    #dataPathCK = "../dataSet/CK+/cohn-kanade-images/"
+    #getCKDataArrayFromImages(dataPathCK)
     
     
     # show one image
@@ -296,6 +293,7 @@ if __name__ == "__main__" :
     img = preprocessing(testImage)
     cv2.imshow('image',img)
     cv2.waitKey(0)
+    
     '''
     #testImage = "../dataSet/jaffe/Angry/KA.AN3.41.tiff"
  
@@ -304,3 +302,8 @@ if __name__ == "__main__" :
     #x = extractModifiedVGGSingleImages(testImage, shape=(1, 256, 256))
     #print ("xxxxxxxx shape: ", x.shape)
     #display_activations(x)
+
+    dataPathJAFFE =  "../dataSet/jaffe/"
+    dataPathCK = "../dataSet/CK+/cohn-kanade-images/"
+    getAllDataTrainResult(dataPathJAFFE, dataPathCK)
+    
