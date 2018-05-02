@@ -1,13 +1,14 @@
 import argparse
 import sys, os
 sys.path.append("../")
+sys.path.append("../modelTrainTestImages")
 
 import cv2
 import numpy as np
 
 import face_detection_utilities as fdu
 
-import model.myVGG as vgg
+from modelTrainTestImages import LSTMTrainTest as lstm
 
 windowsName = 'Preview Screen'
 
@@ -18,8 +19,7 @@ parser.add_argument('-testImage', help=('Given the path of testing image, the pr
 args = parser.parse_args()
 FACE_SHAPE = (48, 48)
 
-model = vgg.VGG_16('my_model_weights_83.h5')
-#model = vgg.VGG_16()
+model = lstm.lstmModel((1,48,48), (1,7), '../modelTrainTestImages/total_with_lstm_model_weights.h5')
 
 emo     = ['Angry', 'Fear', 'Happy',
            'Sad', 'Surprise', 'Neutral']

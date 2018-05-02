@@ -8,8 +8,10 @@ REC_COLOR = (0, 255, 0)
 
 def getFaceCoordinates(image):
     cascade = cv2.CascadeClassifier(CASCADE_PATH)
-    
-    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    img_gray = cv2.imread(image, 0)
+    #img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        
     img_gray = cv2.equalizeHist(img_gray)
     rects = cascade.detectMultiScale(
         img_gray,

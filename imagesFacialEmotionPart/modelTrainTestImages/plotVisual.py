@@ -32,7 +32,6 @@ def plotModel():
     #plot_model(lstmmodel, show_shapes=True, to_file='../plots/LSTM_model.svg')
 
 
-
 def plotLossAccur(history):
     # plot train and validation loss
     plt.figure(1)
