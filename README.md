@@ -1,6 +1,6 @@
 
 
-Project: face-emotion-recognition-in-images-videos
+# Project: face-emotion-recognition-in-images-videos
 
 We explore human recognition system to identify 7 types of emotions by using FER2013 dataset as a pretrained model features.
 Furthermor, we apply this CNN pretrained model features to a Long Short-Term Memory(LSTM) networks and using two
