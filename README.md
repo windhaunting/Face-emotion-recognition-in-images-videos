@@ -12,7 +12,6 @@ model to test on image datasets and video datasets to compare the performance an
 - [Installation](#installation)
 - [Datasets](#datasets)
 - [Model flow](#model-flow)
-- [Results](#results)
 
 ## Installation  
 
