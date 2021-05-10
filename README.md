@@ -33,7 +33,7 @@ used for training and testing:
 
 # Model flow
 
-The [![model architecture] is as follow:
+The [![model architecture](https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png)] is as follow:
 
-(https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png)
+
 
