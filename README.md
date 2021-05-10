@@ -35,5 +35,5 @@ used for training and testing:
 
 The model architecture is as follow:
 
-[![model architecture](https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png)] 
+![model architecture](https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png)
 
