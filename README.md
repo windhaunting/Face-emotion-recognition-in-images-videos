@@ -15,5 +15,19 @@ model to test on image datasets and video datasets to compare the performance an
 - TFLearn
 
 
+#Datasets
+
+used for training and testing:
+
+- JAFFE 
+- CK+2
+- Wild (AFEW) 5.0
+
+
+# Model flow
+
+The [model architecture] (https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png) is as follow:
+
+
 
 
