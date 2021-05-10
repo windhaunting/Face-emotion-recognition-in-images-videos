@@ -7,15 +7,22 @@ Furthermor, we apply this CNN pretrained model features to a Long Short-Term Mem
 datasets(JAFFE and AFEW) to train it and evaluate it. Finally, we use this
 model to test on image datasets and video datasets to compare the performance and get relative high accuracy with and without CNN pretrained model features.
 
-# Dependencies  
+## Table of content
+
+- [Installation](#installation)
+- [Datasets](#datasets)
+- [Model flow](#model-flow)
+- [Results](#results)
+
+## Installation  
+
 - python 3.3 or more
 - opencv 3.4 or more  
-
 - Keras
 - TFLearn
 
 
-#Datasets
+## Datasets
 
 used for training and testing:
 
@@ -26,8 +33,11 @@ used for training and testing:
 
 # Model flow
 
-The [model architecture] (https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png) is as follow:
+The model architecture is as follow:
 
 
+<a href="https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png">
+    <img src="(https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png" alt="Aimeos logo" title="Aimeos" align="right" height="60" />
+</a>
 
 
