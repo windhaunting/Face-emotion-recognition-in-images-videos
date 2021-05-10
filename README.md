@@ -33,11 +33,7 @@ used for training and testing:
 
 # Model flow
 
-The model architecture is as follow:
+The [![model architecture] is as follow:
 
-
-<a href="https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png">
-    <img src="(https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png" alt="Aimeos logo" title="Aimeos" align="right" height="60" />
-</a>
-
+(https://github.com/windhaunting/face-emotion-recognition-in-images-videos/blob/master/model_flow.png)
 
